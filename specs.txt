@@ -1,0 +1,69 @@
+Users have "preferences" array, containing a list of their top preferences.
+At most 10 preferences will be listed. Users may have no preferences at the start of browsing.
+
+format:
+
+{
+    "name" : <name>,
+    "preferences" : {
+        "sports" : "<value>",
+        "history" : "<value>",
+        <etc>
+    }
+}
+
+
+documents are in format:
+
+{
+    "name" : <name>,
+    "id" : <value>,
+    "text" : <article text>,
+    "categories" = [
+        <cat1>, <cat2>, <cat3> ...
+    ]
+}
+
+python and fields:
+
+NUM_ARTICLES = 20
+NUM_DISPLAY = 10
+
+def queryServer(querystring):
+    #Args:
+        #querystring : string
+    #Returns:
+        #list : the NUM_ARTICLES highest ranked page IDs matching the querystring (using "match"), or fewer if fewer are available, as a list.
+
+def getArticleText(id):
+    #Args:
+        #id: integer id of article
+    #Returns:
+        #string : full text of the article with the given ID number, from the database
+        
+def getArticleTitle(id):
+    #Args:
+        #id: integer id of article
+    #Returns:
+        #string : title of article
+        
+def updateUserPreferences(categories):
+    #Args:
+        #categories: list of strings
+    #Returns:
+        #void
+        
+    #For every string in the list of categories, the corresponding user category bin is incremented by one.
+    
+  
+def getUserPreference(category):
+    #Args:
+        #category: string
+    #Returns:
+        #number of hits for this category divided by total number of hits for all categories
+        
+def getUserChoice():
+    #Args: none
+    #Returns:
+        integer: between 1 and NUM_DISPLAY, inclusive, or -1 if the user chooses the exit option
+    #prompts user to choose between the displayed articles or to cancel
