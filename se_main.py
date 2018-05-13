@@ -9,7 +9,6 @@ def show_window():
     se_ui = Ui_MainWindow()
     se_ui.iniWindow(MainWindow)
 
-
     MainWindow.show()
     # app.exec_()
     sys.exit(app.exec_())

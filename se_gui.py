@@ -1,9 +1,12 @@
 from datetime import datetime
-from PyQt5 import QtCore, QtGui, QtWidgets, Qt
+from PyQt5 import QtCore, QtGui, QtWidgets
 import elasticioEx
+from compareEx import Comparator
 
-top = 20
+showtop = 20
+reranktop = 50
 userid = 5
+alpha = 0.01
 
 
 class Ui_MainWindow(object):
@@ -11,8 +14,8 @@ class Ui_MainWindow(object):
     def __init__(self):
         super().__init__()
         self.results = {}
-        self.userprofile = self.loadUserProfile(userid)
-        # self.client = client
+        self.userprofile = {}
+        self.comparator = Comparator(alpha)
 
     def iniWindow(self, MainWindow):
         self.setupUi(MainWindow)
@@ -67,7 +70,7 @@ class Ui_MainWindow(object):
         self.groupBox_4.setStyleSheet("font: 14pt \"18thCentury\";")
         self.groupBox_4.setObjectName("groupBox_4")
         self.searchResultsTableWidget = QtWidgets.QTableWidget(self.groupBox_4)
-        self.searchResultsTableWidget.setGeometry(QtCore.QRect(10, 20, 501, 491))
+        self.searchResultsTableWidget.setGeometry(QtCore.QRect(10, 30, 501, 481))
         self.searchResultsTableWidget.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.searchResultsTableWidget.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
         self.searchResultsTableWidget.setObjectName("searchResultsTableWidget")
@@ -94,6 +97,7 @@ class Ui_MainWindow(object):
         MainWindow.setMenuBar(self.menubar)
         self.actionExit = QtWidgets.QAction(MainWindow)
         self.actionExit.setObjectName("actionExit")
+        self.actionExit.triggered.connect(QtWidgets.QApplication.quit)
         self.menuMenu.addAction(self.actionExit)
         self.menubar.addAction(self.menuMenu.menuAction())
 
@@ -116,15 +120,27 @@ class Ui_MainWindow(object):
         if query_words == "" or query_words.isspace():
             self.addLog("Invalid query!", color="red")
         else:
+            ret = elasticioEx.addQueryHistory(userid, query_words)
+            if ret == 1:
+                self.addLog("Query recorded", color="blue")
+            else:
+                self.addLog("Query adding failed!", color="red")
             '''
             Search here
             '''
-            self.results = elasticioEx.searchArticles(query_words)
+            self.results, hits = elasticioEx.searchArticles(query_words)
             self.searchResultsTableWidget.clearContents()
-            numShowResults = top if len(self.results) > top else len(self.results)
+            numShowResults = showtop if len(self.results) > showtop else len(self.results)  # num of results to display
             self.searchResultsTableWidget.setRowCount(numShowResults)
+
+            if len(self.results) == 0:
+                self.addLog("No results to display!", color="red")
+                return
+
+            self.rerank(hits)    # rerank
+
             rank = 1
-            print(self.results)
+            # print(self.results)
             for k, v in self.results.items():
                 newItem = QtWidgets.QTableWidgetItem(str(rank))
                 newItem.setTextAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
@@ -134,9 +150,28 @@ class Ui_MainWindow(object):
                 newItem.setTextAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
                 self.searchResultsTableWidget.setItem(rank-1, 1, newItem)
                 rank = rank + 1
-                if rank == numShowResults:
+                if rank > numShowResults:
                     break
             self.addLog("User searched '%s'." % query_words)
+
+    def rerank(self, hits):
+        '''
+        Rerank the search results
+        :return: reranked documents
+        '''
+        # self.userprofile = self.loadUserProfile(userid)
+        self.userprofile = elasticioEx.getUserPreferences(userid)
+        # print(self.userprofile)
+        # full_clist = self.comparator.collect_categories(hits)
+        #
+        # user_cv = self.comparator.create_user_cv(self.userprofile, full_clist)
+        # art_cvs = self.comparator.create_all_article_cvs(hits, full_clist)
+        #
+        # for k in self.results.keys():
+        #     self.comparator.cosine_sim(user_cv, art_cvs[k])
+        self.results = self.comparator.rerank(self.results, self.userprofile)
+        result_list = sorted(self.results.items(), key=lambda x: x[1]['score'], reverse=True)
+        self.results = dict(result_list)
 
     def on_result_item_click(self, row, col):
         # cell = self.searchResultsTableWidget.item(row, col)
@@ -147,6 +182,14 @@ class Ui_MainWindow(object):
         categories = doc["categories"]
         self.updateUserProfile(userid, categories)  # Update user profile
 
+    def loadUserProfile(self, userid):
+        '''
+        Load the user profile based on user id
+        :param userid:
+        :return: user profile
+        '''
+        ret = elasticioEx.getUserPreferences(userid)
+        return 0
 
     def updateUserProfile(self, userid, categories):
         '''
@@ -155,10 +198,11 @@ class Ui_MainWindow(object):
         :param categories:
         :return: whatever
         '''
-        return 0
-
-    def exit(self):
-        return 0
+        ret = elasticioEx.updateUserPreferences(userid, categories)
+        if ret == 1:
+            self.addLog("User preferences updated.", color="blue")
+        else:
+            self.addLog("User profile update failed!", color="red")
 
     def addLog(self, text, color="black", size="3"):
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -170,11 +214,4 @@ class Ui_MainWindow(object):
                     "color=\"" + color + "\">" + text + "</font>"
 
 
-    def loadUserProfile(self, userid):
-        '''
-        Load the user profile based on user id
-        :param userid:
-        :return: user profile
-        '''
-        return 0
 

@@ -27,8 +27,9 @@ def searchArticles(query):
     for hit in hits:
         out[hit["_source"]["id"]] = {"title": hit["_source"]["title"],
                                      "text": hit["_source"]["text"],
-                                     "categories": hit["_source"]["categories"]}
-    return out
+                                     "categories": hit["_source"]["categories"],
+                                     "score": hit["_score"]}
+    return out, hits
 
 
 def getArticle(id):
@@ -130,11 +131,12 @@ def getUserPreferences(id):
     user = data["hits"]["hits"][0]["_source"]
     preferences = user["preferences"]
     total = 0
-    out = []
+    out = {}
     for cat in preferences:
         total = total + preferences[cat]
     for cat in preferences:
-        out.append((cat, preferences[cat] * 1.0 / total))
+        # out.append((cat, preferences[cat] * 1.0 / total))
+        out[cat] = preferences[cat] * 1.0 / total
     return out
 
 
