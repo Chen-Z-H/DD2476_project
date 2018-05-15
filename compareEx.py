@@ -41,13 +41,13 @@ class Comparator:
         '''
         u_cv = np.zeros(len(categories))
         cat = list(user.keys())  # THIS NEED FIXING
-        print(cat)
+        # print(cat)
         for c in cat:
             i = np.where(categories == c)[0]
             if len(i) == 0: #i[0].shape[0]==0:
                 continue
             u_cv[i] = user[c]
-        return u_cv
+        return u_cv/np.sum(u_cv)
 
 
     '''
@@ -104,6 +104,25 @@ class Comparator:
             # print("%f, %f\n" % (results[k]['score'], cosine_scores[k]))
             results[k]['score'] = self.alpha*results[k]['score'] + (1-self.alpha)*cosine_scores[k]
         return results
+
+    '''
+    param: top N results from the search engine
+    param: the original query
+    param: user_sh is the user search history
+
+    return: boosted results, sorted
+    '''
+    def LucBoost(self, results, query, user_sh, rho=100):
+        if query in user_sh:
+            res = user_sh[query]
+        else:
+            return results.items()
+        for k,v in results.items():
+            ctQD = np.sum(np.where(np.array(res)==k,1,0))
+            ctQ = len(res)
+            gamma = ctQ / (ctQ+rho)
+            results[k]['score'] = gamma*ctQD/ctQ + (1-gamma)*results[k]['score']
+        return sorted(results.items(), key=lambda x:x[1]['score'], reverse=True)
 
 '''
 if __name__ == '__main__':

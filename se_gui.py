@@ -120,7 +120,8 @@ class Ui_MainWindow(object):
         if query_words == "" or query_words.isspace():
             self.addLog("Invalid query!", color="red")
         else:
-            ret = elasticioEx.addQueryHistory(userid, query_words)
+            # ret = elasticioEx.addQueryHistory(userid, query_words)
+            ret = 1
             if ret == 1:
                 self.addLog("Query recorded", color="blue")
             else:
@@ -137,7 +138,7 @@ class Ui_MainWindow(object):
                 self.addLog("No results to display!", color="red")
                 return
 
-            self.rerank(hits)    # rerank
+            self.rerank(hits, query_words)    # rerank
 
             rank = 1
             # print(self.results)
@@ -154,7 +155,7 @@ class Ui_MainWindow(object):
                     break
             self.addLog("User searched '%s'." % query_words)
 
-    def rerank(self, hits):
+    def rerank(self, hits, query):
         '''
         Rerank the search results
         :return: reranked documents
@@ -169,9 +170,17 @@ class Ui_MainWindow(object):
         #
         # for k in self.results.keys():
         #     self.comparator.cosine_sim(user_cv, art_cvs[k])
-        self.results = self.comparator.rerank(self.results, self.userprofile)
-        result_list = sorted(self.results.items(), key=lambda x: x[1]['score'], reverse=True)
-        self.results = dict(result_list)
+
+
+        # self.results = self.comparator.rerank(self.results, self.userprofile)
+        # result_list = sorted(self.results.items(), key=lambda x: x[1]['score'], reverse=True)
+        # self.results = dict(result_list)
+
+        sh = elasticioEx.getUserHistory(userid)
+        self.results = self.comparator.LucBoost(self.results,query,sh)
+        self.results = dict(self.results)
+
+
 
     def on_result_item_click(self, row, col):
         # cell = self.searchResultsTableWidget.item(row, col)
@@ -180,6 +189,7 @@ class Ui_MainWindow(object):
         self.contentTextEdit.setText(doc["text"])
         self.addLog("User clicked '%s'." % doc["title"])
         categories = doc["categories"]
+        print('cat:',categories)
         self.updateUserProfile(userid, categories)  # Update user profile
 
     def loadUserProfile(self, userid):

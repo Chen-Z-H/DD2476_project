@@ -188,9 +188,10 @@ def addQueryHistory(id, query):
 
 def getUserHistory(userID):
     conn = hc.HTTPConnection(server)
-    conn.request("GET", searchuserurl + "q=id:" + (str)(id) + "&_source=search_history")
+    conn.request("GET", searchuserurl + "q=id:" + (str)(userID) + "&_source=search_history")
     response = conn.getresponse()
     data = json.loads(response.read())
+    print(data)
     if (data["hits"]["total"] != 1):
         print("Error: user with id %d exists %d times" % (id, data["hits"]["total"]))
         conn.close()
