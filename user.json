@@ -2,5 +2,5 @@ curl -XPOST 'http://localhost:9200/users/user/5' -H'Content-Type: application/js
 {
 	"id":5, 
 	"preferences": {"Java":3}, 
-	"search_history": ["programming"]
+	"search_history": {"Alan Turing": ["29010", "4076"]}
 }'
