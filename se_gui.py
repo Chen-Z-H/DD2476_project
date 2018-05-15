@@ -24,7 +24,7 @@ class Ui_MainWindow(object):
         return 0
 
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName("A very simple search engine")
+        MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1115, 690)
         MainWindow.setMinimumSize(QtCore.QSize(1115, 690))
         MainWindow.setMaximumSize(QtCore.QSize(1115, 690))
@@ -94,12 +94,28 @@ class Ui_MainWindow(object):
         self.menubar.setObjectName("menubar")
         self.menuMenu = QtWidgets.QMenu(self.menubar)
         self.menuMenu.setObjectName("menuMenu")
+        self.menuAlgorithm = QtWidgets.QMenu(self.menubar)
+        self.menuAlgorithm.setObjectName("menuAlgorithm")
         MainWindow.setMenuBar(self.menubar)
         self.actionExit = QtWidgets.QAction(MainWindow)
         self.actionExit.setObjectName("actionExit")
         self.actionExit.triggered.connect(QtWidgets.QApplication.quit)
+        self.actionContent_Based = QtWidgets.QAction(MainWindow)
+        self.actionContent_Based.setCheckable(True)
+        self.actionContent_Based.setChecked(True)
+        self.actionContent_Based.setObjectName("actionContent_Based")
+        self.actionQuery_Based = QtWidgets.QAction(MainWindow)
+        self.actionQuery_Based.setCheckable(True)
+        self.actionQuery_Based.setObjectName("actionQuery_Based")
+        self.actionContent_Query = QtWidgets.QAction(MainWindow)
+        self.actionContent_Query.setCheckable(True)
+        self.actionContent_Query.setObjectName("actionContent_Query")
         self.menuMenu.addAction(self.actionExit)
+        self.menuAlgorithm.addAction(self.actionContent_Based)
+        self.menuAlgorithm.addAction(self.actionQuery_Based)
+        self.menuAlgorithm.addAction(self.actionContent_Query)
         self.menubar.addAction(self.menuMenu.menuAction())
+        self.menubar.addAction(self.menuAlgorithm.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -113,15 +129,18 @@ class Ui_MainWindow(object):
         self.groupBox_3.setTitle(_translate("MainWindow", "Logs"))
         self.groupBox_4.setTitle(_translate("MainWindow", "Results"))
         self.menuMenu.setTitle(_translate("MainWindow", "Menu"))
+        self.menuAlgorithm.setTitle(_translate("MainWindow", "Algorithm"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
+        self.actionContent_Based.setText(_translate("MainWindow", "Content-Based"))
+        self.actionQuery_Based.setText(_translate("MainWindow", "Query-Based"))
+        self.actionContent_Query.setText(_translate("MainWindow", "Content+Query"))
 
     def query(self):
         query_words = self.queryLineEdit.text()
         if query_words == "" or query_words.isspace():
             self.addLog("Invalid query!", color="red")
         else:
-            # ret = elasticioEx.addQueryHistory(userid, query_words)
-            ret = 1
+            ret = elasticioEx.addQueryHistory(userid, query_words)
             if ret == 1:
                 self.addLog("Query recorded", color="blue")
             else:
@@ -138,7 +157,7 @@ class Ui_MainWindow(object):
                 self.addLog("No results to display!", color="red")
                 return
 
-            self.rerank(hits, query_words)    # rerank
+            self.rerank(query_words)    # rerank
 
             rank = 1
             # print(self.results)
@@ -155,7 +174,7 @@ class Ui_MainWindow(object):
                     break
             self.addLog("User searched '%s'." % query_words)
 
-    def rerank(self, hits, query):
+    def rerank(self, query):
         '''
         Rerank the search results
         :return: reranked documents
@@ -170,27 +189,26 @@ class Ui_MainWindow(object):
         #
         # for k in self.results.keys():
         #     self.comparator.cosine_sim(user_cv, art_cvs[k])
-
-
         # self.results = self.comparator.rerank(self.results, self.userprofile)
         # result_list = sorted(self.results.items(), key=lambda x: x[1]['score'], reverse=True)
         # self.results = dict(result_list)
 
         sh = elasticioEx.getUserHistory(userid)
-        self.results = self.comparator.LucBoost(self.results,query,sh)
+        self.results = self.comparator.LucBoost(self.results, query, sh)
         self.results = dict(self.results)
-
-
 
     def on_result_item_click(self, row, col):
         # cell = self.searchResultsTableWidget.item(row, col)
         doc = list(self.results.values())[row]
-        # print(doc)
-        self.contentTextEdit.setText(doc["text"])
-        self.addLog("User clicked '%s'." % doc["title"])
         categories = doc["categories"]
-        print('cat:',categories)
+        # print(doc)
+        self.contentTextEdit.setText(self._formatString("Text:", color="blue"))
+        self.addLog("User clicked '%s'." % doc["title"])
         self.updateUserProfile(userid, categories)  # Update user profile
+        self.contentTextEdit.append(doc["text"])
+        self.contentTextEdit.append("\n")
+        self.contentTextEdit.append(self._formatString("Categories:\n", color="blue"))
+        self.contentTextEdit.append("\n".join(categories))
 
     def loadUserProfile(self, userid):
         '''
@@ -219,9 +237,11 @@ class Ui_MainWindow(object):
         content = self._formatString("%s: %s\n" % (now, text), color, size)
         self.logsTextEdit.append(content)
 
-    def _formatString(self, text, color, size):
+    def _formatString(self, text, color="black", size="3"):
         return "<font size=\"" + size + "\" " \
                     "color=\"" + color + "\">" + text + "</font>"
 
+    def NDGG(self):
+        return 0
 
 

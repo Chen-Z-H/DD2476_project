@@ -109,7 +109,6 @@ class Comparator:
     param: top N results from the search engine
     param: the original query
     param: user_sh is the user search history
-
     return: boosted results, sorted
     '''
     def LucBoost(self, results, query, user_sh, rho=100):
@@ -118,11 +117,11 @@ class Comparator:
         else:
             return results.items()
         for k,v in results.items():
-            ctQD = np.sum(np.where(np.array(res)==k,1,0))
+            ctQD = np.sum(np.where(np.array(res)==k, 1, 0))
             ctQ = len(res)
             gamma = ctQ / (ctQ+rho)
             results[k]['score'] = gamma*ctQD/ctQ + (1-gamma)*results[k]['score']
-        return sorted(results.items(), key=lambda x:x[1]['score'], reverse=True)
+        return sorted(results.items(), key=lambda x: x[1]['score'], reverse=True)
 
 '''
 if __name__ == '__main__':
@@ -135,7 +134,6 @@ if __name__ == '__main__':
     print('Original:')
     for d in results:
         print(d['_source']['title'],d['_score'])
-
     new_results = comp.rerank(results,user)
     new_results.sort(key=lambda x: x['_score'], reverse=True)
     print('New:')

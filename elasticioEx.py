@@ -186,68 +186,25 @@ def addQueryHistory(id, query):
     else:
         return 0
 
-def getUserHistory(userID):
-    conn = hc.HTTPConnection(server)
-    conn.request("GET", searchuserurl + "q=id:" + (str)(userID) + "&_source=search_history")
-    response = conn.getresponse()
-    data = json.loads(response.read())
-    print(data)
-    if (data["hits"]["total"] != 1):
-        print("Error: user with id %d exists %d times" % (id, data["hits"]["total"]))
-        conn.close()
-        return 0
-    user = data["hits"]["hits"][0]["_source"]
-    conn.close()
-    return user['search_history']
-
-
-def getTermVectors(docId):
-    '''
-    param: docId
-
-    return: dictionary with terms as keys and values are a dictionary of the form:
-    {
-        "term_freq": tf,
-        "tokens": [{
-            "position": 80,
-            "start_offset": 538,
-            "end_offset": 539
-        },...]
-    }
-    '''
-    conn = hc.HTTPConnection(server)
-    new_data = {
-        "fields":["text"]
-    }
-    params = json.dumps(new_data)
-    conn.request("POST", '/articles/article/'+docId+'/_termvectors', params, \
-                 {"Content-type": "application/json"})
-    response = conn.getresponse()
-    data = json.loads(response.read())
-    terms = data['term_vectors']['text']['terms']
-    conn.close()
-    return terms
 
 def main():
-    # title, text = getArticle(3333)
+    title, text = getArticle(3333)
     # print title
     # print text
     # updateUserPreferences(5, ["sports", "testcategory"])
     # print(getUserPreference(5, "testcategory"))
     # addQueryHistory(5, "q13")
-    # list = searchArticles("Alan Turing")
+    list = searchArticles("Alan Turing")
     # for article in list:
     #    print article[0] + " " + article[1]
     #    for category in article[2]:
     #        print category, "****",
     #    print
     #    print
-    # preferences = getUserPreferences(5)
+    preferences = getUserPreferences(5)
     # print("Haha: %d" % (preferences))
-    # for entry in preferences:
-    #     print(entry[0] + " " + str(entry[1]))
-    terms = getTermVectors('342758')
-    print(terms['0'])
+    for entry in preferences:
+        print(entry[0] + " " + str(entry[1]))
 
 
 if __name__ == "__main__":
