@@ -91,7 +91,13 @@ class Comparator:
     return: cosine similarity
     '''
     def cosine_sim(self, u_cv, a_cvs):
-        normFactor = 1.0 / np.linalg.norm(u_cv) / np.linalg.norm(list(a_cvs.values()))
+        normFactor = 1.0
+        norm_u = np.linalg.norm(u_cv)
+        norm_a = np.linalg.norm(list(a_cvs.values()))
+        if (norm_u != 0):
+            normFactor /= norm_u
+        if (norm_a != 0):
+            normFactor /= norm_a
         for k, v in a_cvs.items():
             a_cvs[k] = (u_cv@v) * normFactor
         return a_cvs
