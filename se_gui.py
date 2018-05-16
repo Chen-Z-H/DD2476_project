@@ -18,6 +18,7 @@ class Ui_MainWindow(object):
         self.comparator = Comparator(alpha)
         self.mode = -1   # -1 for default tf-idf score, 0 for content-based method, 1 for query based method, 2 for combined method
         self.currentquery = ""
+        self.update = 1     # 0 for turned off, 1 for turned on
 
     def iniWindow(self, MainWindow):
         self.setupUi(MainWindow)
@@ -121,11 +122,19 @@ class Ui_MainWindow(object):
         self.actionContent_Query.triggered.connect(self._setModeContentQuery)
         self.actionDefault.triggered.connect(self._setModeDefault)
 
+        self.actionUpdate = QtWidgets.QAction(MainWindow)
+        self.actionUpdate.setCheckable(True)
+        self.actionUpdate.setChecked(True)
+        print(self.actionUpdate.isChecked())
+        self.actionUpdate.setObjectName("update")
+        self.actionUpdate.triggered.connect(self._setUpdate)
+
         self.menuMenu.addAction(self.actionExit)
         self.menuAlgorithm.addAction(self.actionDefault)
         self.menuAlgorithm.addAction(self.actionContent_Based)
         self.menuAlgorithm.addAction(self.actionQuery_Based)
         self.menuAlgorithm.addAction(self.actionContent_Query)
+        self.menuAlgorithm.addAction(self.actionUpdate)
         self.menubar.addAction(self.menuMenu.menuAction())
         self.menubar.addAction(self.menuAlgorithm.menuAction())
 
@@ -147,6 +156,7 @@ class Ui_MainWindow(object):
         self.actionContent_Based.setText(_translate("MainWindow", "Content-Based"))
         self.actionQuery_Based.setText(_translate("MainWindow", "Query-Based"))
         self.actionContent_Query.setText(_translate("MainWindow", "Content+Query"))
+        self.actionUpdate.setText(_translate("MainWindow", "Update profile"))
 
     def query(self):
         query_words = self.queryLineEdit.text()
@@ -154,11 +164,12 @@ class Ui_MainWindow(object):
             self.addLog("Invalid query!", color="red")
         else:
             self.currentquery = query_words
-            ret = elasticioEx.addQueryHistory(userid, query_words, "")
-            if ret == 1:
-                self.addLog("Query recorded", color="blue")
-            else:
-                self.addLog("Query adding failed!", color="red")
+            if self.update == 1:
+                ret = elasticioEx.addQueryHistory(userid, query_words, "")
+                if ret == 1:
+                    self.addLog("Query recorded", color="blue")
+                else:
+                    self.addLog("Query adding failed!", color="red")
             '''
             Search here
             '''
@@ -231,15 +242,17 @@ class Ui_MainWindow(object):
         # cell = self.searchResultsTableWidget.item(row, col)
         doc = list(self.results.values())[row]
         docid = list(self.results.keys())[row]
-        ret = elasticioEx.addQueryHistory(userid, self.currentquery, docid)     # record the clickthrough of query here
-
         categories = doc["categories"]
+        if self.update == 1:
+            ret = elasticioEx.addQueryHistory(userid, self.currentquery, docid)     # record the clickthrough of query here
+            self.updateUserProfile(userid, categories)  # Update user profile
+
         # print(doc)
         self.contentTextEdit.setText(self._formatString("Text:", color="blue"))
         self.addLog("User clicked '%s'." % doc["title"])
-        self.updateUserProfile(userid, categories)  # Update user profile
         self.contentTextEdit.append(doc["text"])
         # print(doc["title"] + ": " + docid)
+
         self.contentTextEdit.append("\n")
         self.contentTextEdit.append(self._formatString("Categories:\n", color="blue"))
         self.contentTextEdit.append("\n".join(categories))
@@ -306,5 +319,17 @@ class Ui_MainWindow(object):
         self.actionContent_Based.setChecked(False)
         self.actionQuery_Based.setChecked(False)
         self.actionContent_Query.setChecked(False)
+
+    def _setUpdate(self):
+        if self.update == 1:
+            self.update = 0
+            self.actionUpdate.setChecked(False)
+            self.addLog("User turned off updating", color="green")
+            print("User turned off updating")
+        else:
+            self.update = 1
+            self.actionUpdate.setChecked(True)
+            self.addLog("User turned on updating", color="green")
+            print("User turned on updating")
 
 
