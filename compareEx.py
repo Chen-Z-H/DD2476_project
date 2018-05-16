@@ -25,10 +25,12 @@ class Comparator:
     '''
     def collect_categories(self, results):
         c_all = []
+        total = 0
         for k, v in results.items():
             c = results[k]['categories']
             c_all.extend(c)
-        return np.unique(c_all)
+            total += results[k]['score']
+        return np.unique(c_all), total
 
     '''
     param: user object
@@ -41,13 +43,17 @@ class Comparator:
         '''
         u_cv = np.zeros(len(categories))
         cat = list(user.keys())  # THIS NEED FIXING
-        # print(cat)
+        #print("user is \n" + str(user))
+        #print("cat is \n" + str(cat))
         for c in cat:
             i = np.where(categories == c)[0]
             if len(i) == 0: #i[0].shape[0]==0:
                 continue
             u_cv[i] = user[c]
-        return u_cv/np.sum(u_cv)
+        #print("final user cv is \n" + str(u_cv))
+        if (np.sum(u_cv) != 0):
+            u_cv = u_cv / np.sum(u_cv)
+        return u_cv
 
 
     '''
@@ -87,7 +93,7 @@ class Comparator:
     def cosine_sim(self, u_cv, a_cvs):
         for k, v in a_cvs.items():
             a_cvs[k] = u_cv@v
-        return a_cvs
+        return a_cvs / np.linalg.norm(u_cv) / np.linalg.norm(a_cvs)
 
 
     '''
@@ -96,13 +102,13 @@ class Comparator:
     return: new_results where the objects have been re-ranked using category similarity scores as well.
     '''
     def rerank(self, results, user):
-        cat = self.collect_categories(results)
+        cat, tot = self.collect_categories(results)
         u_cv = self.create_user_cv(user, cat)
         a_cvs = self.create_all_article_cvs(results, cat)
         cosine_scores = self.cosine_sim(u_cv, a_cvs)
         for k, v in results.items():
             # print("%f, %f\n" % (results[k]['score'], cosine_scores[k]))
-            results[k]['score'] = self.alpha*results[k]['score'] + (1-self.alpha)*cosine_scores[k]
+            results[k]['score'] = self.alpha*results[k]['score']/tot + (1-self.alpha)*cosine_scores[k]
         return results
 
     '''
@@ -116,7 +122,7 @@ class Comparator:
             res = user_sh[query]
         else:
             return results.items()
-        for k,v in results.items():
+        for k, v in results.items():
             ctQD = np.sum(np.where(np.array(res)==k, 1, 0))
             ctQ = len(res)
             gamma = ctQ / (ctQ+rho)

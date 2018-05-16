@@ -138,6 +138,8 @@ def getUserPreferences(id):
     for cat in preferences:
         # out.append((cat, preferences[cat] * 1.0 / total))
         out[cat] = preferences[cat] * 1.0 / total
+    #print("preferences is \n" + str(preferences))
+    #print("out is \n" + str(out))
     return out
 
 
@@ -198,9 +200,10 @@ def addQueryHistory(userID, query, docid=""):
     conn.request("POST", url, params, {"Content-type": "application/json"})
     response = json.loads(conn.getresponse().read())
     conn.close()
-    if (response["result"] == "updated"):
+    if (response["result"] == "updated" or response["result"] == "noop"):
         return 1
     else:
+        print(response)
         return 0
 
 def getUserHistory(userID):
