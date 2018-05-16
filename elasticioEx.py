@@ -1,5 +1,6 @@
 import http.client as hc
 import http.client, urllib.parse, json
+import re
 
 headers = {"Content-type": "application/json"}
 
@@ -25,11 +26,21 @@ def searchArticles(query):
     conn.close()
     hits = data["hits"]["hits"]
     out = {}
+    total = 0
     for hit in hits:
+        total = total + hit["_score"]
+    for hit in hits:
+        text = hit["_source"]["text"].replace("\\n", "\n").replace("\\t","\t").replace("&lt;","<").replace("&gt;",">").replace("&amp;times;","×").replace("&quot;", "\"")
+        text = re.sub(r"\[\[([a-zA-Z0-9 -:\.\(\)]*)\]\]", r"\1", text)
+        text = re.sub(r"\[\[([a-zA-Z0-9 -:\.\(\)]*)\|([a-zA-Z0-9 -:\.\(\)]*)\]\]", r"\2", text)
+        text = re.sub(r"\[\[File:[^\]]*\]\]", r"", text)
         out[hit["_source"]["id"]] = {"title": hit["_source"]["title"],
-                                     "text": hit["_source"]["text"],
+                                     "text": text,
                                      "categories": hit["_source"]["categories"],
-                                     "score": hit["_score"]}
+                                     "score": hit["_score"] / total}
+    print("out is \n")
+    for key in out:
+        print((str)(out[key]["score"]))
     return out, hits
 
 
