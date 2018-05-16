@@ -20,7 +20,7 @@ def searchArticles(query):
     # A list of tuples (id, title, categories) for top NUM_ARTICLES results
     #
     conn = hc.HTTPConnection(server)
-    conn.request("GET", searcharticleurl + "q=" + urllib.parse.quote(query) + "&_source=title,id,text,categories&size=" + (str)(NUM_ARTICLES))
+    conn.request("GET", searcharticleurl + "q=text:" + urllib.parse.quote(query) + "&_source=title,id,text,categories&size=" + (str)(NUM_ARTICLES))
     response = conn.getresponse()
     data = json.loads(response.read())
     conn.close()
@@ -38,9 +38,6 @@ def searchArticles(query):
                                      "text": text,
                                      "categories": hit["_source"]["categories"],
                                      "score": hit["_score"] / total}
-    print("out is \n")
-    for key in out:
-        print((str)(out[key]["score"]))
     return out, hits
 
 
