@@ -211,7 +211,12 @@ class Ui_MainWindow(object):
             self.addLog("Reranked by query-based method.", color="blue")
         else:
             # content+query
-            print(0)
+            self.results = self.comparator.rerank(self.results, self.userprofile)
+            result_list = sorted(self.results.items(), key=lambda x: x[1]['score'], reverse=True)
+            self.results = dict(result_list)
+            sh = elasticioEx.getUserHistory(userid)
+            self.results = self.comparator.LucBoost(self.results, query, sh)
+            self.results = dict(self.results)
             self.addLog("Reranked by combined method.", color="blue")
 
     def on_result_item_click(self, row, col):
