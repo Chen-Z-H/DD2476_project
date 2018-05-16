@@ -16,7 +16,7 @@ class Ui_MainWindow(object):
         self.results = {}
         self.userprofile = {}
         self.comparator = Comparator(alpha)
-        self.mode = 0   # 0 for content-based method, 1 for query based method, 2 for combined method
+        self.mode = 0   # -1 for default tf-idf score, 0 for content-based method, 1 for query based method, 2 for combined method
         self.currentquery = ""
 
     def iniWindow(self, MainWindow):
@@ -102,9 +102,13 @@ class Ui_MainWindow(object):
         self.actionExit = QtWidgets.QAction(MainWindow)
         self.actionExit.setObjectName("actionExit")
         self.actionExit.triggered.connect(QtWidgets.QApplication.quit)
+        self.actionDefault = QtWidgets.QAction(MainWindow)
+        self.actionDefault.setCheckable(True)
+        self.actionDefault.setChecked(True)
+        self.actionDefault.setObjectName("Default(tf-idf)")
+
         self.actionContent_Based = QtWidgets.QAction(MainWindow)
         self.actionContent_Based.setCheckable(True)
-        self.actionContent_Based.setChecked(True)
         self.actionContent_Based.setObjectName("actionContent_Based")
         self.actionQuery_Based = QtWidgets.QAction(MainWindow)
         self.actionQuery_Based.setCheckable(True)
@@ -115,8 +119,10 @@ class Ui_MainWindow(object):
         self.actionContent_Based.triggered.connect(self._setModeContent)
         self.actionQuery_Based.triggered.connect(self._setModeQuery)
         self.actionContent_Query.triggered.connect(self._setModeContentQuery)
+        self.actionDefault.triggered.connect(self._setModeDefault)
 
         self.menuMenu.addAction(self.actionExit)
+        self.menuAlgorithm.addAction(self.actionDefault)
         self.menuAlgorithm.addAction(self.actionContent_Based)
         self.menuAlgorithm.addAction(self.actionQuery_Based)
         self.menuAlgorithm.addAction(self.actionContent_Query)
@@ -137,6 +143,7 @@ class Ui_MainWindow(object):
         self.menuMenu.setTitle(_translate("MainWindow", "Menu"))
         self.menuAlgorithm.setTitle(_translate("MainWindow", "Algorithm"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
+        self.actionDefault.setText(_translate("MainWindow", "Default"))
         self.actionContent_Based.setText(_translate("MainWindow", "Content-Based"))
         self.actionQuery_Based.setText(_translate("MainWindow", "Query-Based"))
         self.actionContent_Query.setText(_translate("MainWindow", "Content+Query"))
@@ -164,7 +171,8 @@ class Ui_MainWindow(object):
                 self.addLog("No results to display!", color="red")
                 return
 
-            self.rerank(query_words)    # rerank
+            if self.mode != -1:
+                self.rerank(query_words)    # rerank
 
             rank = 1
             # print(self.results)
@@ -209,7 +217,7 @@ class Ui_MainWindow(object):
             self.results = self.comparator.LucBoost(self.results, query, sh)
             self.results = dict(self.results)
             self.addLog("Reranked by query-based method.", color="blue")
-        else:
+        elif self.mode == 2:
             # content+query
             self.results = self.comparator.rerank(self.results, self.userprofile)
             result_list = sorted(self.results.items(), key=lambda x: x[1]['score'], reverse=True)
@@ -270,6 +278,7 @@ class Ui_MainWindow(object):
     def _setModeContent(self):
         self.mode = 0
         self.addLog("User set mode as 'content-based'.", color="green")
+        self.actionDefault.setChecked(False)
         self.actionContent_Based.setChecked(True)
         self.actionQuery_Based.setChecked(False)
         self.actionContent_Query.setChecked(False)
@@ -277,6 +286,7 @@ class Ui_MainWindow(object):
     def _setModeQuery(self):
         self.mode = 1
         self.addLog("User set mode as 'query-based'.", color="green")
+        self.actionDefault.setChecked(False)
         self.actionContent_Based.setChecked(False)
         self.actionQuery_Based.setChecked(True)
         self.actionContent_Query.setChecked(False)
@@ -284,8 +294,17 @@ class Ui_MainWindow(object):
     def _setModeContentQuery(self):
         self.mode = 2
         self.addLog("User set mode as 'content+query'.", color="green")
+        self.actionDefault.setChecked(False)
         self.actionContent_Based.setChecked(False)
         self.actionQuery_Based.setChecked(False)
         self.actionContent_Query.setChecked(True)
+
+    def _setModeDefault(self):
+        self.mode = -1
+        self.addLog("User set mode as 'Default(tf-idf)'.", color="green")
+        self.actionDefault.setChecked(True)
+        self.actionContent_Based.setChecked(False)
+        self.actionQuery_Based.setChecked(False)
+        self.actionContent_Query.setChecked(False)
 
 
