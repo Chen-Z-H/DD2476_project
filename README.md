@@ -1,7 +1,7 @@
 ### Index the data to elasticsearch
 
 This simple search engine can only apply to the specific strutures of the data of articles and the users.
-So before we run the programme, we need make sure that the data have the following structures.</br>
+So before you run the program, we need make sure that the data have the following structures.</br>
 Structure of user:
 ```javascript
 {
@@ -34,7 +34,7 @@ Run the following command to index data of articles to elasticsearch:
 ```
 ```
 
-If you already have indices called 'articles' and 'users', you may need to delete them before with the following commands:
+If you already have indices called 'articles' and 'users', you may need to delete them with the following commands before indexing new data:
 ```
 curl -XDELETE 'localhost:9200/articles'  // Delete the index of articles
 ```
@@ -50,7 +50,18 @@ python se_main.py
 ```
 
 ### Introduction to the GUI
-<img src="https://github.com/gondor2222/DD2476_project/raw/LucBooost/figures/window.png" width="600"/>
+<img src="https://github.com/gondor2222/DD2476_project/raw/LucBooost/figures/menu.jpg" width="600"/>
 
+| No. | Function  |
+| ---------- | :-----------:  |
+| 1  | Choose the algorithm you want to use for re-ranking here.    |
+| 2  | Turn on/off the update function here.    |
 
+<img src="https://github.com/gondor2222/DD2476_project/raw/LucBooost/figures/main.png" width="600"/>
 
+| No. | Function  |
+| ---------- | :-----------:  |
+| 1  | Input the query words here and click 'Go' to start a query.    |
+| 2  | The ranked search results will be displayed here, click a certain result to check the detailed information.    |
+| 3  | The detailed information including text and categories of the clicked result will be shown here.    |
+| 4  | The running logs of the search engine will be shown here.    |
