@@ -1,3 +1,26 @@
+-----------------------------------------
+DEPRECATED, READ FILE "README" INSTEAD
+-----------------------------------------
+DEPRECATED, READ FILE "README" INSTEAD
+-----------------------------------------
+DEPRECATED, READ FILE "README" INSTEAD
+-----------------------------------------
+DEPRECATED, READ FILE "README" INSTEAD
+-----------------------------------------
+DEPRECATED, READ FILE "README" INSTEAD
+-----------------------------------------
+DEPRECATED, READ FILE "README" INSTEAD
+-----------------------------------------
+DEPRECATED, READ FILE "README" INSTEAD
+-----------------------------------------
+DEPRECATED, READ FILE "README" INSTEAD
+-----------------------------------------
+DEPRECATED, READ FILE "README" INSTEAD
+-----------------------------------------
+DEPRECATED, READ FILE "README" INSTEAD
+-----------------------------------------
+DEPRECATED, READ FILE "README" INSTEAD
+-----------------------------------------
 ### Index the data to elasticsearch
 
 This simple search engine can only apply to the specific strutures of the data of articles and the users.
