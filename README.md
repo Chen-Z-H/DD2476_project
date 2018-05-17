@@ -54,7 +54,7 @@ Here is some basic introduction to the functions of this simple search engine.
 | No. | Function  |
 | ---------- | :-----------:  |
 | 1  | Choose the algorithm you want to use for re-ranking here.    |
-| 2  | Turn on/off the update function here.    |
+| 2  | Turn on/off the update function here.  If you turn off this switch, all the search and clickthrough will not be recorded.  |
 
 <img src="https://github.com/gondor2222/DD2476_project/raw/LucBooost/figures/main.png" width="600"/>
 
