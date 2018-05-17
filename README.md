@@ -1,7 +1,7 @@
 ### Index the data to elasticsearch
 
 This simple search engine can only apply to the specific strutures of the data of articles and the users.
-So before we run the programme, we need make sure that the data have the following structures.</br>
+So before you run the program, you need make sure that the data have the following structures.</br>
 Structure of user:
 ```javascript
 {
@@ -21,7 +21,7 @@ Structure of article:
     ]
 }
 ```
-Run the following command to create a record of user with id of 5:
+Run the following command to create a record of user with id 5:
 ```
 curl -XPOST 'http://localhost:9200/users/user/5' -H'Content-Type: application/json' -d'
 {
@@ -30,11 +30,9 @@ curl -XPOST 'http://localhost:9200/users/user/5' -H'Content-Type: application/js
 	"search_history": {}
 }'
 ```
-Run the following command to index data of articles to elasticsearch:
-```
-```
+Our original data of articles is too large to push on github, but you can use any data that have the format above.
 
-If you already have indices called 'articles' and 'users', you may need to delete them before with the following commands:
+If you already have indices called 'articles' and 'users', you may need to delete them with the following commands before indexing new data:
 ```
 curl -XDELETE 'localhost:9200/articles'  // Delete the index of articles
 ```
@@ -50,6 +48,20 @@ python se_main.py
 ```
 
 ### Introduction to the GUI
-<img src="https://github.com/gondor2222/DD2476_project/raw/LucBooost/figures/window.png" width="600"/>
+Here is some basic introduction to the functions of this simple search engine.
+<img src="https://github.com/gondor2222/DD2476_project/raw/LucBooost/figures/menu.jpg" width="600"/>
 
+| No. | Function  |
+| ---------- | :-----------:  |
+| 1  | Choose the algorithm you want to use for re-ranking here.    |
+| 2  | Turn on/off the update function here.  If you turn off this switch, all the search and clickthrough will not be recorded.  |
+
+<img src="https://github.com/gondor2222/DD2476_project/raw/LucBooost/figures/main.png" width="600"/>
+
+| No. | Function  |
+| ---------- | :-----------:  |
+| 1  | Input the query words here and click 'Go' to start searching.    |
+| 2  | The ranked search results will be displayed here, click a certain result to check the detailed information.    |
+| 3  | The detailed information including text and categories of the clicked result will be shown here.    |
+| 4  | The running logs of the search engine will be shown here.    |
 
